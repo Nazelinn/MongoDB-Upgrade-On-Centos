@@ -1,0 +1,19 @@
+--Öncelikle upgrade işlemi secondary nodelar da yapılır secondary tamamlandıktan sonra primary node bağlanılır rs.stepDown() işlemi yapılır sonrasında eski primary de aynı işlemler yapılır ve yeni primary node da setFeatureCompatibilityVersion yapılır.
+systemctl stop mongo-hb.service
+vi /etc/yum.repos.d/mongodb44.repo
+[mongodb-org-4.4]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.4/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
+
+yum makecache fast
+yum update mongodb-org-server -y
+systemctl start mongo-hb.service
+
+---en son aşamada tüm sunucular update olduktan sonra primary node bağlanılır use admin altında aşağıdaki setFeatureCompatibilityVersion yapılır
+db.adminCommand( { setFeatureCompatibilityVersion: "4.4" })
+
+---setFeatureCompatibilityVersion kontrolü yapılır.
+db.adminCommand( { getParameter: 1, featureCompatibilityVersion: 1 } )
